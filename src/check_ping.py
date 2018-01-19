@@ -10,8 +10,9 @@ curl_command = "curl -s -w %{{time_total}}\\n -o /dev/null {0}"
 data_list = []
 unique_website_list = []
 w_list_short = []
+final_website_list = []
 
-date_string = datetime.now().timetuple().tm_yday
+date_string = 365+int(datetime.now().timetuple().tm_yday)
 
 with open("website_list.csv", "r") as website_csv:
 	website_list = website_csv.readlines()
@@ -28,18 +29,20 @@ for website in w_list_short:
 
 print len(unique_website_list)
 
+counter = 0
 for website in unique_website_list:
 	url = website
 	print 'Trying:', url
 	try:
-		data_list.append(float(subprocess.check_output(curl_command.format(url), shell=True)[:-1]))
+		data_list.append(float(subprocess.check_output(curl_command.format(str(url)), shell=True)[:-1]))
+		final_website_list.append(url)
 	except:
 		print 'Could not connect to site. Moving on. '
-		unique_website_list.pop(unique_website_list.index(website))
+		continue
 
 with open("data_for_{0}.txt".format(date_string), "w") as database:
-	for website in unique_website_list:
- 		database.write("%s" % website)
+	for website in final_website_list:
+ 		database.write("%s\n" % website[1:-2])
  	database.write("======================\n")
  	for element in data_list:
  		database.write("%s\n" % str(element))
